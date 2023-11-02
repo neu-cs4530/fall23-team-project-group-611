@@ -603,7 +603,6 @@ describe('[T2] TicTacToeArea', () => {
         act(() => {
           gameAreaController.mockMoveCount = 3;
           gameAreaController.mockWhoseTurn = gameAreaController.mockO;
-          gameAreaController.mockIsOurTurn = false;
           gameAreaController.emit('gameUpdated');
         });
         expect(

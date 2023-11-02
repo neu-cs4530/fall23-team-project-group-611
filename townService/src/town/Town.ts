@@ -10,6 +10,7 @@ import {
   ChatMessage,
   ConversationArea as ConversationAreaModel,
   CoveyTownSocket,
+  VotingArea as VotingAreaModel,
   Interactable,
   InteractableCommand,
   InteractableCommandBase,
@@ -23,6 +24,7 @@ import ConversationArea from './ConversationArea';
 import GameAreaFactory from './games/GameAreaFactory';
 import InteractableArea from './InteractableArea';
 import ViewingArea from './ViewingArea';
+import VotingArea from './VotingArea';
 
 /**
  * The Town class implements the logic for each town: managing the various events that
@@ -302,6 +304,34 @@ export default class Town {
   }
 
   /**
+   * Creates a new voting area in this town if there is not currently an active
+   * voting with the same ID. The voting area ID must match the name of a
+   * voting area that exists in this town's map, and the voting area must not
+   * already have a topic set.
+   *
+   * If successful creating the voting area, this method:
+   *  Adds any players who are in the region defined by the voting area to it.
+   *  Notifies all players in the town that the voting area has been updated
+   *
+   * @param votingArea Information describing the voting area to create. Ignores any
+   *  occupantsById that are set on the voting area that is passed to this method.
+   *
+   * @returns true if the voting is successfully created, or false if there is no known
+   * voting area with the specified ID or if there is already an active voting area
+   * with the specified ID
+   */
+  public addVotingArea(votingArea: VotingAreaModel): boolean {
+    const area = this._interactables.find(eachArea => eachArea.id === votingArea.id) as VotingArea;
+    if (!area || !votingArea.votes || area.votes) {
+      return false;
+    }
+    area.votes = votingArea.votes;
+    area.addPlayersWithinBounds(this._players);
+    this._broadcastEmitter.emit('interactableUpdate', area.toModel());
+    return true;
+  }
+
+  /**
    * Creates a new viewing area in this town if there is not currently an active
    * viewing area with the same ID. The viewing area ID must match the name of a
    * viewing area that exists in this town's map, and the viewing area must not
@@ -400,6 +430,10 @@ export default class Town {
         ConversationArea.fromMapObject(eachConvAreaObj, this._broadcastEmitter),
       );
 
+    const votingAreas = objectLayer.objects
+      .filter(eachObject => eachObject.type === 'VotingArea')
+      .map(eachConvAreaObj => VotingArea.fromMapObject(eachConvAreaObj, this._broadcastEmitter));
+
     const gameAreas = objectLayer.objects
       .filter(eachObject => eachObject.type === 'GameArea')
       .map(eachGameAreaObj => GameAreaFactory(eachGameAreaObj, this._broadcastEmitter));
@@ -407,6 +441,7 @@ export default class Town {
     this._interactables = this._interactables
       .concat(viewingAreas)
       .concat(conversationAreas)
+      .concat(votingAreas)
       .concat(gameAreas);
     this._validateInteractables();
   }

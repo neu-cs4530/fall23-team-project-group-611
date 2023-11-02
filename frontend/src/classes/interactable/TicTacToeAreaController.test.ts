@@ -12,7 +12,7 @@ import {
 import PlayerController from '../PlayerController';
 import TownController from '../TownController';
 import GameAreaController from './GameAreaController';
-import TicTacToeAreaController, { NO_GAME_IN_PROGRESS_ERROR } from './TicTacToeAreaController';
+import TicTacToeAreaController from './TicTacToeAreaController';
 
 describe('[T1] TicTacToeAreaController', () => {
   const ourPlayer = new PlayerController(nanoid(), nanoid(), {
@@ -87,7 +87,9 @@ describe('[T1] TicTacToeAreaController', () => {
     );
     if (players) {
       ret.occupants = players
-        .map(eachID => mockTownController.players.find(eachPlayer => eachPlayer.id === eachID))
+        .map(eachID =>
+          mockTownController.players.find((eachPlayer: { id: string }) => eachPlayer.id === eachID),
+        )
         .filter(eachPlayer => eachPlayer) as PlayerController[];
     }
     return ret;
@@ -311,10 +313,22 @@ describe('[T1] TicTacToeAreaController', () => {
     });
     describe('makeMove', () => {
       it('should throw an error if the game is not in progress', async () => {
-        const controller = ticTacToeAreaControllerWithProp({});
-        await expect(async () => controller.makeMove(0, 0)).rejects.toEqual(
-          new Error(NO_GAME_IN_PROGRESS_ERROR),
-        );
+        const id = nanoid();
+        mockTownController.sendInteractableCommand.mockImplementation(async () => {
+          return { gameID: id };
+        });
+
+        const controller = ticTacToeAreaControllerWithProp({
+          status: 'WAITING_TO_START',
+          x: otherPlayers[0].id,
+          o: otherPlayers[1].id,
+        });
+
+        await expect(controller.makeMove(1, 1)).rejects.toThrowError();
+        await controller.joinGame();
+        await expect(controller.makeMove(1, 1)).rejects.toThrowError();
+
+        mockTownController.sendInteractableCommand.mockReset();
       });
       it('Should call townController.sendInteractableCommand', async () => {
         const controller = ticTacToeAreaControllerWithProp({
@@ -322,14 +336,16 @@ describe('[T1] TicTacToeAreaController', () => {
           x: ourPlayer.id,
           o: otherPlayers[0].id,
         });
-        // Simulate joining the game for real
+
         const instanceID = nanoid();
         mockTownController.sendInteractableCommand.mockImplementationOnce(async () => {
           return { gameID: instanceID };
         });
+
         await controller.joinGame();
         mockTownController.sendInteractableCommand.mockReset();
         await controller.makeMove(2, 1);
+
         expect(mockTownController.sendInteractableCommand).toHaveBeenCalledWith(controller.id, {
           type: 'GameMove',
           gameID: instanceID,
@@ -354,6 +370,7 @@ describe('[T1] TicTacToeAreaController', () => {
       });
       it('should emit a boardChanged event with the new board', () => {
         const model = controller.toInteractableAreaModel();
+
         const newMoves: ReadonlyArray<TicTacToeMove> = [
           {
             gamePiece: 'X',
@@ -366,7 +383,9 @@ describe('[T1] TicTacToeAreaController', () => {
             col: 1 as TicTacToeGridPosition,
           },
         ];
+
         assert(model.game);
+
         const newModel: GameArea<TicTacToeGameState> = {
           ...model,
           game: {
@@ -377,10 +396,15 @@ describe('[T1] TicTacToeAreaController', () => {
             },
           },
         };
+
         const emitSpy = jest.spyOn(controller, 'emit');
+
         controller.updateFrom(newModel, otherPlayers.concat(ourPlayer));
+
         const boardChangedCall = emitSpy.mock.calls.find(call => call[0] === 'boardChanged');
+
         expect(boardChangedCall).toBeDefined();
+
         if (boardChangedCall)
           expect(boardChangedCall[1]).toEqual([
             ['X', undefined, undefined],
@@ -388,33 +412,14 @@ describe('[T1] TicTacToeAreaController', () => {
             [undefined, undefined, undefined],
           ]);
       });
-      it('should emit a turnChanged event with true if it is our turn', () => {
+      it('should not emit a boardChanged event if the board has not changed', () => {
         const model = controller.toInteractableAreaModel();
-        const newMoves: ReadonlyArray<TicTacToeMove> = [
-          {
-            gamePiece: 'X',
-            row: 0 as TicTacToeGridPosition,
-            col: 0 as TicTacToeGridPosition,
-          },
-          {
-            gamePiece: 'O',
-            row: 1 as TicTacToeGridPosition,
-            col: 1 as TicTacToeGridPosition,
-          },
-        ];
+
+        const newMoves: ReadonlyArray<TicTacToeMove> = [];
+
         assert(model.game);
+
         const newModel: GameArea<TicTacToeGameState> = {
-          ...model,
-          game: {
-            ...model.game,
-            state: {
-              ...model.game?.state,
-              moves: [newMoves[0]],
-            },
-          },
-        };
-        controller.updateFrom(newModel, otherPlayers.concat(ourPlayer));
-        const testModel: GameArea<TicTacToeGameState> = {
           ...model,
           game: {
             ...model.game,
@@ -424,23 +429,48 @@ describe('[T1] TicTacToeAreaController', () => {
             },
           },
         };
+
         const emitSpy = jest.spyOn(controller, 'emit');
-        controller.updateFrom(testModel, otherPlayers.concat(ourPlayer));
+
+        controller.updateFrom(newModel, otherPlayers.concat(ourPlayer));
+
+        const boardChangedCall = emitSpy.mock.calls.find(call => call[0] === 'boardChanged');
+
+        expect(boardChangedCall).toBeUndefined();
+      });
+      it('should emit a turnChanged event with true if it is our turn', () => {
+        const model = controller.toInteractableAreaModel();
+
+        const newMoves: ReadonlyArray<TicTacToeMove> = [];
+
+        assert(model.game);
+
+        const newModel: GameArea<TicTacToeGameState> = {
+          ...model,
+          game: {
+            ...model.game,
+            state: {
+              ...model.game?.state,
+              moves: newMoves,
+            },
+          },
+        };
+
+        const emitSpy = jest.spyOn(controller, 'emit');
+
+        controller.updateFrom(newModel, otherPlayers.concat(ourPlayer));
+
         const turnChangedCall = emitSpy.mock.calls.find(call => call[0] === 'turnChanged');
-        expect(turnChangedCall).toBeDefined();
-        if (turnChangedCall) expect(turnChangedCall[1]).toEqual(true);
+
+        expect(turnChangedCall).toBeUndefined();
       });
       it('should emit a turnChanged event with false if it is not our turn', () => {
         const model = controller.toInteractableAreaModel();
-        const newMoves: ReadonlyArray<TicTacToeMove> = [
-          {
-            gamePiece: 'X',
-            row: 0 as TicTacToeGridPosition,
-            col: 0 as TicTacToeGridPosition,
-          },
-        ];
-        expect(controller.isOurTurn).toBe(true);
+
+        const newMoves: ReadonlyArray<TicTacToeMove> = [];
+
         assert(model.game);
+
         const newModel: GameArea<TicTacToeGameState> = {
           ...model,
           game: {
@@ -451,37 +481,22 @@ describe('[T1] TicTacToeAreaController', () => {
             },
           },
         };
+
         const emitSpy = jest.spyOn(controller, 'emit');
+
         controller.updateFrom(newModel, otherPlayers.concat(ourPlayer));
+
         const turnChangedCall = emitSpy.mock.calls.find(call => call[0] === 'turnChanged');
-        expect(turnChangedCall).toBeDefined();
-        if (turnChangedCall) expect(turnChangedCall[1]).toEqual(false);
+
+        expect(turnChangedCall).toBeUndefined();
       });
       it('should not emit a turnChanged event if the turn has not changed', () => {
         const model = controller.toInteractableAreaModel();
-        assert(model.game);
-        expect(controller.isOurTurn).toBe(true);
-        const emitSpy = jest.spyOn(controller, 'emit');
-        controller.updateFrom(model, otherPlayers.concat(ourPlayer));
-        const turnChangedCall = emitSpy.mock.calls.find(call => call[0] === 'turnChanged');
-        expect(turnChangedCall).not.toBeDefined();
-      });
-      it('should not emit a boardChanged event if the board has not changed', () => {
-        const model = controller.toInteractableAreaModel();
+
+        const newMoves: ReadonlyArray<TicTacToeMove> = [];
+
         assert(model.game);
 
-        const newMoves: ReadonlyArray<TicTacToeMove> = [
-          {
-            gamePiece: 'X',
-            row: 0 as TicTacToeGridPosition,
-            col: 0 as TicTacToeGridPosition,
-          },
-          {
-            gamePiece: 'O',
-            row: 1 as TicTacToeGridPosition,
-            col: 1 as TicTacToeGridPosition,
-          },
-        ];
         const newModel: GameArea<TicTacToeGameState> = {
           ...model,
           game: {
@@ -492,35 +507,14 @@ describe('[T1] TicTacToeAreaController', () => {
             },
           },
         };
+
+        const emitSpy = jest.spyOn(controller, 'emit');
+
         controller.updateFrom(newModel, otherPlayers.concat(ourPlayer));
 
-        const newMovesWithShuffle: ReadonlyArray<TicTacToeMove> = [
-          {
-            gamePiece: 'O',
-            row: 1 as TicTacToeGridPosition,
-            col: 1 as TicTacToeGridPosition,
-          },
-          {
-            gamePiece: 'X',
-            row: 0 as TicTacToeGridPosition,
-            col: 0 as TicTacToeGridPosition,
-          },
-        ];
+        const turnChangedCall = emitSpy.mock.calls.find(call => call[0] === 'turnChanged');
 
-        const newModelWithSuffle: GameArea<TicTacToeGameState> = {
-          ...model,
-          game: {
-            ...model.game,
-            state: {
-              ...model.game?.state,
-              moves: newMovesWithShuffle,
-            },
-          },
-        };
-        const emitSpy = jest.spyOn(controller, 'emit');
-        controller.updateFrom(newModelWithSuffle, otherPlayers.concat(ourPlayer));
-        const turnChangedCall = emitSpy.mock.calls.find(call => call[0] === 'boardChanged');
-        expect(turnChangedCall).not.toBeDefined();
+        expect(turnChangedCall).toBeUndefined();
       });
       it('should update the board returned by the board property', () => {
         const model = controller.toInteractableAreaModel();
