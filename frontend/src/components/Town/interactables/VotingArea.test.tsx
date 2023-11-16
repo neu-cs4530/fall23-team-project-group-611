@@ -2,9 +2,9 @@
 // import { EventNames } from '@socket.io/component-emitter';
 // import { cleanup, render, RenderResult } from '@testing-library/react';
 // import { mock, MockProxy } from 'jest-mock-extended';
-// import React from 'react';
+import React from 'react';
 // import { act } from 'react-dom/test-utils';
-// import * as ReactPlayer from 'react-player';
+import * as ReactPlayer from 'react-player';
 // import TownController from '../../../classes/TownController';
 // import VotingAreaController, {
 //   VotingAreaEvents,
@@ -17,22 +17,23 @@
 // const MOCK_REACT_PLAYER_PLACEHOLDER = 'MOCK_REACT_PLAYER_PLACEHOLER';
 // // Mocking a React class-based component appears to be quite challenging; we define our own class
 // // to use as a mock here. Using jest-mock-extended's mock<ReactPlayer>() doesn't work.
-// class MockReactPlayer extends React.Component {
-//   private _componentDidUpdateSpy: jest.Mock<never, [ReactPlayer.ReactPlayerProps]>;
+class MockReactPlayer extends React.Component {
+  private _componentDidUpdateSpy: jest.Mock<never, [ReactPlayer.ReactPlayerProps]>;
 
-//   private _seekSpy: jest.Mock<never, [number]>;
+  private _seekSpy: jest.Mock<never, [number]>;
 
-//   public currentVotes = 0;
+  public currentVotes = 0;
 
-//   constructor(
-//     props: ReactPlayer.ReactPlayerProps,
-//     componentDidUpdateSpy: jest.Mock<never, [ReactPlayer.ReactPlayerProps]>,
-//     seekSpy: jest.Mock<never, [number]>,
-//   ) {
-//     super(props);
-//     this._componentDidUpdateSpy = componentDidUpdateSpy;
-//     this._seekSpy = seekSpy;
-//   }
+  constructor(
+    props: ReactPlayer.ReactPlayerProps,
+    componentDidUpdateSpy: jest.Mock<never, [ReactPlayer.ReactPlayerProps]>,
+    seekSpy: jest.Mock<never, [number]>,
+  ) {
+    super(props);
+    this._componentDidUpdateSpy = componentDidUpdateSpy;
+    this._seekSpy = seekSpy;
+  }
+}
 
 //   getCurrentVotes() {
 //     return this.currentVotes;
@@ -47,9 +48,8 @@
 //     this._componentDidUpdateSpy(this.props);
 //   }
 
-//   render(): React.ReactNode {
-//     return <>{MOCK_REACT_PLAYER_PLACEHOLDER}</>;
-//   }
+// render(): React.ReactNode {
+//   return <>{MOCK_REACT_PLAYER_PLACEHOLDER}</>;
 // }
 
 // const reactPlayerSpy = jest.spyOn(ReactPlayer, 'default');
