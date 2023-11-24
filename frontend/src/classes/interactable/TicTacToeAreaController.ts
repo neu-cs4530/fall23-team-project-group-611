@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {
   GameArea,
   GameStatus,
@@ -25,12 +24,6 @@ export default class TicTacToeAreaController extends GameAreaController<
   TicTacToeGameState,
   TicTacToeEvents
 > {
-  protected _board: TicTacToeCell[][] = [
-    [undefined, undefined, undefined],
-    [undefined, undefined, undefined],
-    [undefined, undefined, undefined],
-  ];
-
   /**
    * Returns the current state of the board.
    *
@@ -40,47 +33,62 @@ export default class TicTacToeAreaController extends GameAreaController<
    * and board[2][2] is the bottom-right cell
    */
   get board(): TicTacToeCell[][] {
-    return this._board;
+    const moves = this._model.game?.state.moves;
+    const arrBoard: TicTacToeCell[][] = [
+      [undefined, undefined, undefined],
+      [undefined, undefined, undefined],
+      [undefined, undefined, undefined],
+    ];
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        if (moves?.find(m => m.row == row && m.col == col) != undefined) {
+          arrBoard[row][col] = moves?.find(m => m.row == row && m.col == col)?.gamePiece;
+        }
+      }
+    }
+    return arrBoard;
   }
 
   /**
    * Returns the player with the 'X' game piece, if there is one, or undefined otherwise
    */
   get x(): PlayerController | undefined {
-    const x = this._model.game?.state.x;
-    if (x) {
-      return this.occupants.find(eachOccupant => eachOccupant.id === x);
+    if (this._model.game?.state.x != undefined) {
+      return this.occupants.find(o => o.id == this._model.game?.state.x);
+    } else {
+      return undefined;
     }
-    return undefined;
   }
 
   /**
    * Returns the player with the 'O' game piece, if there is one, or undefined otherwise
    */
   get o(): PlayerController | undefined {
-    const o = this._model.game?.state.o;
-    if (o) {
-      return this.occupants.find(eachOccupant => eachOccupant.id === o);
+    if (this._model.game?.state.o != undefined) {
+      return this.occupants.find(o => o.id == this._model.game?.state.o);
+    } else {
+      return undefined;
     }
-    return undefined;
   }
 
   /**
    * Returns the number of moves that have been made in the game
    */
   get moveCount(): number {
-    return this._model.game?.state.moves.length || 0;
+    return this.board.reduce((moves, row) => moves + row.filter(r => r != undefined).length, 0);
   }
 
   /**
    * Returns the winner of the game, if there is one
    */
   get winner(): PlayerController | undefined {
-    const winner = this._model.game?.state.winner;
-    if (winner) {
-      return this.occupants.find(eachOccupant => eachOccupant.id === winner);
+    if (this._model.game?.state.x == this._model.game?.state.winner) {
+      return this.x;
+    } else if (this._model.game?.state.o == this._model.game?.state.winner) {
+      return this.o;
+    } else {
+      return undefined;
     }
-    return undefined;
   }
 
   /**
@@ -88,29 +96,28 @@ export default class TicTacToeAreaController extends GameAreaController<
    * Returns undefined if the game is not in progress
    */
   get whoseTurn(): PlayerController | undefined {
-    const x = this.x;
-    const o = this.o;
-    if (!x || !o || this._model.game?.state.status !== 'IN_PROGRESS') {
+    if (!this.isActive()) {
       return undefined;
-    }
-    if (this.moveCount % 2 === 0) {
-      return x;
-    } else if (this.moveCount % 2 === 1) {
-      return o;
+    } else if (this.moveCount % 2 == 0) {
+      return this.x;
     } else {
-      throw new Error('Invalid move count');
+      return this.o;
     }
   }
 
+  /**
+   * Returns true if it is our turn to make a move in the game
+   * Returns false if it is not our turn, or if the game is not in progress
+   */
   get isOurTurn(): boolean {
-    return this.whoseTurn?.id === this._townController.ourPlayer.id;
+    return this.whoseTurn == this._townController.ourPlayer;
   }
 
   /**
    * Returns true if the current player is a player in this game
    */
   get isPlayer(): boolean {
-    return this._model.game?.players.includes(this._townController.ourPlayer.id) || false;
+    return this._townController.ourPlayer == this.x || this._townController.ourPlayer == this.o;
   }
 
   /**
@@ -119,12 +126,13 @@ export default class TicTacToeAreaController extends GameAreaController<
    * Throws an error PLAYER_NOT_IN_GAME_ERROR if the current player is not a player in this game
    */
   get gamePiece(): 'X' | 'O' {
-    if (this.x?.id === this._townController.ourPlayer.id) {
+    if (this._townController.ourPlayer == this.x) {
       return 'X';
-    } else if (this.o?.id === this._townController.ourPlayer.id) {
+    } else if (this._townController.ourPlayer == this.o) {
       return 'O';
+    } else {
+      throw new Error(PLAYER_NOT_IN_GAME_ERROR);
     }
-    throw new Error(PLAYER_NOT_IN_GAME_ERROR);
   }
 
   /**
@@ -132,18 +140,18 @@ export default class TicTacToeAreaController extends GameAreaController<
    * Defaults to 'WAITING_TO_START' if the game is not in progress
    */
   get status(): GameStatus {
-    const status = this._model.game?.state.status;
-    if (!status) {
+    if (this._model.game?.state.status == undefined) {
       return 'WAITING_TO_START';
+    } else {
+      return this._model.game?.state.status;
     }
-    return status;
   }
 
   /**
    * Returns true if the game is in progress
    */
   public isActive(): boolean {
-    return this._model.game?.state.status === 'IN_PROGRESS';
+    return this.status == 'IN_PROGRESS';
   }
 
   /**
@@ -159,29 +167,47 @@ export default class TicTacToeAreaController extends GameAreaController<
    * If the turn has not changed, does not emit the event.
    */
   protected _updateFrom(newModel: GameArea<TicTacToeGameState>): void {
-    const wasOurTurn = this.whoseTurn?.id === this._townController.ourPlayer.id;
+    const oldBoard = this.board;
+    const oldTurn = this.whoseTurn;
+
     super._updateFrom(newModel);
-    const newState = newModel.game;
-    if (newState) {
-      const newBoard: TicTacToeCell[][] = [
-        [undefined, undefined, undefined],
-        [undefined, undefined, undefined],
-        [undefined, undefined, undefined],
-      ];
-      newState.state.moves.forEach(move => {
-        newBoard[move.row][move.col] = move.gamePiece;
-      });
-      if (!_.isEqual(newBoard, this._board)) {
-        this._board = newBoard;
-        this.emit('boardChanged', this._board);
-      }
+
+    const newBoard = this.board;
+    const newTurn = this.whoseTurn;
+
+    if (this._boardChanged(oldBoard, newBoard)) {
+      this.emit('boardChanged', this.board);
     }
-    const isOurTurn = this.whoseTurn?.id === this._townController.ourPlayer.id;
-    if (wasOurTurn != isOurTurn) this.emit('turnChanged', isOurTurn);
+    if (oldTurn != newTurn) {
+      this.emit('turnChanged', this.isOurTurn);
+    }
   }
 
   /**
-   * Sends a request to the server to make a move in the game
+   * Compares the rows and columns of the old board and the new board.
+   *
+   * Returns true if there has been a change between the two boards.
+   *
+   * @param oldBoard The board before super._updateFrom is called
+   * @param newBoard The board after super._updateFrom is called
+   */
+  private _boardChanged(oldBoard: TicTacToeCell[][], newBoard: TicTacToeCell[][]): boolean {
+    let changes = false;
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        if (oldBoard[row][col] != newBoard[row][col]) {
+          changes = true;
+        }
+      }
+    }
+    return changes;
+  }
+
+  /**
+   * Sends a request to the server to make a move in the game.
+   * Uses the this._townController.sendInteractableCommand method to send the request.
+   * The request should be of type 'GameMove',
+   * and send the gameID provided by `this._instanceID`.
    *
    * If the game is not in progress, throws an error NO_GAME_IN_PROGRESS_ERROR
    *
@@ -189,18 +215,18 @@ export default class TicTacToeAreaController extends GameAreaController<
    * @param col Column of the move
    */
   public async makeMove(row: TicTacToeGridPosition, col: TicTacToeGridPosition) {
-    const instanceID = this._instanceID;
-    if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
+    if (!this.isActive || this._instanceID === undefined) {
       throw new Error(NO_GAME_IN_PROGRESS_ERROR);
+    } else {
+      const instanceID = this._instanceID;
+      const gamePiece = this.gamePiece;
+      if (instanceID) {
+        await this._townController.sendInteractableCommand(this.id, {
+          type: 'GameMove',
+          gameID: instanceID,
+          move: { row, col, gamePiece },
+        });
+      }
     }
-    await this._townController.sendInteractableCommand(this.id, {
-      type: 'GameMove',
-      gameID: instanceID,
-      move: {
-        row,
-        col,
-        gamePiece: this.gamePiece,
-      },
-    });
   }
 }

@@ -7,6 +7,7 @@ import { io } from 'socket.io-client';
 import TypedEmitter from 'typed-emitter';
 import Interactable from '../components/Town/Interactable';
 import ConversationArea from '../components/Town/interactables/ConversationArea';
+import VotingArea from '../components/Town/interactables/VotingArea';
 import GameArea from '../components/Town/interactables/GameArea';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
 import { LoginController } from '../contexts/LoginControllerContext';
@@ -26,7 +27,12 @@ import {
   TownSettingsUpdate,
   ViewingArea as ViewingAreaModel,
 } from '../types/CoveyTownSocket';
-import { isConversationArea, isTicTacToeArea, isViewingArea } from '../types/TypeUtils';
+import {
+  isConversationArea,
+  isTicTacToeArea,
+  isViewingArea,
+  isVotingArea,
+} from '../types/TypeUtils';
 import ConversationAreaController from './interactable/ConversationAreaController';
 import GameAreaController, { GameEventTypes } from './interactable/GameAreaController';
 import InteractableAreaController, {
@@ -34,6 +40,7 @@ import InteractableAreaController, {
 } from './interactable/InteractableAreaController';
 import TicTacToeAreaController from './interactable/TicTacToeAreaController';
 import ViewingAreaController from './interactable/ViewingAreaController';
+import VotingAreaController from './interactable/VotingAreaController';
 import PlayerController from './PlayerController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
@@ -312,6 +319,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return ret as ConversationAreaController[];
   }
 
+  public get votingAreas(): VotingAreaController[] {
+    const ret = this._interactableControllers.filter(
+      eachInteractable => eachInteractable instanceof VotingAreaController,
+    );
+    return ret as VotingAreaController[];
+  }
+
   public get interactableEmitter() {
     return this._interactableEmitter;
   }
@@ -550,6 +564,17 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   /**
+   * Create a new voting area, sending the request to the townService. Throws an error if the request
+   * is not successful. Does not immediately update local state about the new voting area - it will be
+   * updated once the townService creates the area and emits an interactableUpdate
+   *
+   * @param newArea
+   */
+  async createVotingArea(newArea: { votes: number; id: string; occupants: Array<string> }) {
+    await this._townsService.createVotingArea(this.townID, this.sessionToken, newArea);
+  }
+
+  /**
    * Create a new viewing area, sending the request to the townService. Throws an error if the request
    * is not successful. Does not immediately update local state about the new viewing area - it will be
    * updated once the townService creates the area and emits an interactableUpdate
@@ -599,6 +624,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
                 this._playersByIDs.bind(this),
               ),
             );
+          } else if (isVotingArea(eachInteractable)) {
+            this._interactableControllers.push(
+              VotingAreaController.fromVotingAreaModel(
+                eachInteractable,
+                this._playersByIDs.bind(this),
+              ),
+            );
           } else if (isViewingArea(eachInteractable)) {
             this._interactableControllers.push(new ViewingAreaController(eachInteractable));
           } else if (isTicTacToeArea(eachInteractable)) {
@@ -636,12 +668,23 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   public getConversationAreaController(
-    converationArea: ConversationArea,
+    conversationArea: ConversationArea,
   ): ConversationAreaController {
     const existingController = this._interactableControllers.find(
-      eachExistingArea => eachExistingArea.id === converationArea.name,
+      eachExistingArea => eachExistingArea.id === conversationArea.name,
     );
     if (existingController instanceof ConversationAreaController) {
+      return existingController;
+    } else {
+      throw new Error(`No such viewing area controller ${existingController}`);
+    }
+  }
+
+  public getVotingAreaController(votingArea: VotingArea): VotingAreaController {
+    const existingController = this._interactableControllers.find(
+      eachExistingArea => eachExistingArea.id === votingArea.id,
+    );
+    if (existingController instanceof VotingAreaController) {
       return existingController;
     } else {
       throw new Error(`No such viewing area controller ${existingController}`);
@@ -781,6 +824,33 @@ export function useActiveConversationAreas(): ConversationAreaController[] {
     };
   }, [townController, setConversationAreas]);
   return conversationAreas;
+}
+
+/**
+ * A react hook to retrieve the active voting areas. This hook will re-render any components
+ * that use it when the set of voting areas changes. It does *not* re-render its dependent components
+ * when the state of one of those areas changes - if that is desired, @see useVotingAreaTopic and @see useVotingAreaOccupants
+ *
+ * This hook relies on the TownControllerContext.
+ *
+ * @returns the list of voting area controllers that are currently "active"
+ */
+export function useActiveVotingAreas(): VotingAreaController[] {
+  const townController = useTownController();
+  const [votingAreas, setVotingAreas] = useState<VotingAreaController[]>(
+    townController.votingAreas.filter(eachArea => !eachArea.isEmpty()),
+  );
+  useEffect(() => {
+    const updater = () => {
+      const allAreas = townController.votingAreas;
+      setVotingAreas(allAreas.filter(eachArea => !eachArea.isEmpty()));
+    };
+    townController.addListener('interactableAreasChanged', updater);
+    return () => {
+      townController.removeListener('interactableAreasChanged', updater);
+    };
+  }, [townController, setVotingAreas]);
+  return votingAreas;
 }
 
 /**

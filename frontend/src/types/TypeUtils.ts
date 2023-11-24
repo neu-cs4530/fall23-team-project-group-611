@@ -4,6 +4,7 @@ import {
   TicTacToeGameState,
   ViewingArea,
   GameArea,
+  VotingArea,
 } from './CoveyTownSocket';
 
 /**
@@ -11,6 +12,13 @@ import {
  */
 export function isConversationArea(interactable: Interactable): interactable is ConversationArea {
   return interactable.type === 'ConversationArea';
+}
+
+/**
+ * Test to see if an interactable is a voting area
+ */
+export function isVotingArea(interactable: Interactable): interactable is VotingArea {
+  return interactable.type === 'VotingArea';
 }
 
 /**
