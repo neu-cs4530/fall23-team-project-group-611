@@ -46,6 +46,14 @@ export default class TicTacToeGameArea extends GameArea<TicTacToeGame> {
     this._emitAreaChanged();
   }
 
+  public remove(player: Player) {
+    super.remove(player);
+    if (this._occupants.length === 0) {
+      // this.votes = 0;
+      this._emitAreaChanged();
+    }
+  }
+
   /**
    * Handle a command from a player in this game area.
    * Supported commands:
@@ -110,6 +118,14 @@ export default class TicTacToeGameArea extends GameArea<TicTacToeGame> {
       game.leave(player);
       this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    if (command.type === 'KickPlayerCommand') {
+      const playerController = this.occupants.find(
+        playerToKick => command.playerid === playerToKick.id,
+      );
+      if (playerController) {
+        this.remove(playerController);
+      }
     }
     throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
   }
