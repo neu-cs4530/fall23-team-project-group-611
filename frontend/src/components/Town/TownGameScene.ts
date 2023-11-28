@@ -6,20 +6,20 @@ import { PlayerLocation } from '../../types/CoveyTownSocket';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import Interactable from './Interactable';
 import ConversationArea from './interactables/ConversationArea';
+import VotingArea from './interactables/VotingArea';
 import GameArea from './interactables/GameArea';
 import Transporter from './interactables/Transporter';
 import ViewingArea from './interactables/ViewingArea';
-import VotingArea from './interactables/VotingArea';
 
 // Still not sure what the right type is here... "Interactable" doesn't do it
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function interactableTypeForObjectType(type: string): any {
   if (type === 'ConversationArea') {
     return ConversationArea;
-  } else if (type === 'Transporter') {
-    return Transporter;
   } else if (type === 'VotingArea') {
     return VotingArea;
+  } else if (type === 'Transporter') {
+    return Transporter;
   } else if (type === 'ViewingArea') {
     return ViewingArea;
   } else if (type === 'GameArea') {

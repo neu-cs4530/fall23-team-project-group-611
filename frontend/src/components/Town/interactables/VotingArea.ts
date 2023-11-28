@@ -73,6 +73,7 @@ export default class VotingArea extends Interactable {
   }
 
   private _showInfoBox() {
+    console.log('attempting to show Box');
     if (!this._infoTextBox) {
       this._infoTextBox = this.scene.add
         .text(
@@ -83,14 +84,17 @@ export default class VotingArea extends Interactable {
         )
         .setScrollFactor(0)
         .setDepth(30);
+      console.log('is showing Box');
     }
     this._infoTextBox.setVisible(true);
     this._infoTextBox.x = this.scene.scale.width / 2 - this._infoTextBox.width / 2;
   }
 
   overlap(): void {
-    if (this._votingArea?.votes === undefined) {
+    console.log('attempting to overlap');
+    if (this._votingArea?.votes === 0) {
       this._showInfoBox();
+      console.log('is overlapping');
     }
   }
 
