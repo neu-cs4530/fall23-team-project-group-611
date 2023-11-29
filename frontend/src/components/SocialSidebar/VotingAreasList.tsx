@@ -1,7 +1,7 @@
 import { Box, Heading, ListItem, UnorderedList } from '@chakra-ui/react';
 import React from 'react';
 import VotingAreaController, {
-  useVotingAreaVotes,
+  useVotingAreaPoll,
 } from '../../classes/interactable/VotingAreaController';
 import { useInteractableAreaOccupants } from '../../classes/interactable/InteractableAreaController';
 import { useActiveVotingAreas } from '../../classes/TownController';
@@ -22,7 +22,7 @@ type VotingAreaViewProps = {
  */
 function VotingAreaView({ area }: VotingAreaViewProps): JSX.Element {
   const occupants = useInteractableAreaOccupants(area);
-  const vote = useVotingAreaVotes(area);
+  const vote = useVotingAreaPoll(area);
 
   return (
     <Box>

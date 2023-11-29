@@ -322,10 +322,10 @@ export default class Town {
    */
   public addVotingArea(votingArea: VotingAreaModel): boolean {
     const area = this._interactables.find(eachArea => eachArea.id === votingArea.id) as VotingArea;
-    if (!area || !votingArea.votes || area.votes) {
+    if (!area || !votingArea.poll || area.poll) {
       return false;
     }
-    area.votes = votingArea.votes;
+    area.poll = votingArea.poll;
     area.addPlayersWithinBounds(this._players);
     this._broadcastEmitter.emit('interactableUpdate', area.toModel());
     return true;

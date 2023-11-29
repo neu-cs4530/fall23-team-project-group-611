@@ -12,25 +12,25 @@ describe('[T2] ViewingAreaController', () => {
   const mockListeners = mock<VotingAreaEvents>();
   beforeEach(() => {
     testAreaModel = {
-      votes: 0,
+      poll: 0,
       id: nanoid(),
       occupants: [],
       type: 'VotingArea',
     };
-    testArea = new VotingAreaController(testAreaModel.id, testAreaModel.votes);
+    testArea = new VotingAreaController(testAreaModel.id, testAreaModel.poll);
     mockClear(townController);
-    mockClear(mockListeners.votesChange);
-    testArea.addListener('votesChange', mockListeners.votesChange);
+    mockClear(mockListeners.pollChange);
+    testArea.addListener('pollChange', mockListeners.pollChange);
   });
-  describe('Setting votes property', () => {
-    it('updates the property and emits a votesChange event if the property changes', () => {
-      const newVotes = 11;
-      testArea.votes = newVotes;
-      expect(mockListeners.votesChange).toBeCalledWith(newVotes);
-      expect(testArea.votes).toEqual(newVotes);
+  describe('Setting poll property', () => {
+    it('updates the property and emits a pollChange event if the property changes', () => {
+      const newPoll = 11;
+      testArea.poll = newPoll;
+      expect(mockListeners.pollChange).toBeCalledWith(newPoll);
+      expect(testArea.poll).toEqual(newPoll);
     });
-    it('does not emit a votesChange event if the votes property does not change', () => {
-      testArea.votes = testAreaModel.votes;
+    it('does not emit a pollChange event if the poll property does not change', () => {
+      testArea.poll = testAreaModel.poll;
       expect(mockListeners.videoChange).not.toBeCalled();
     });
   });
@@ -41,22 +41,22 @@ describe('[T2] ViewingAreaController', () => {
     });
   });
   describe('updateFrom', () => {
-    it('Updates the votes properties from new model', () => {
+    it('Updates the poll properties from new model', () => {
       const newModel: VotingArea = {
         id: testAreaModel.id,
-        votes: 11,
+        poll: 11,
         occupants: [],
         type: 'VotingArea',
       };
       testArea.updateFrom(newModel, []);
-      expect(testArea.votes).toEqual(newModel.votes);
-      expect(mockListeners.votesChange).toBeCalledWith(newModel.votes);
+      expect(testArea.poll).toEqual(newModel.poll);
+      expect(mockListeners.pollChange).toBeCalledWith(newModel.poll);
     });
     it('Does not update the id property', () => {
       const existingID = testArea.id;
       const newModel: VotingArea = {
         id: nanoid(),
-        votes: 0,
+        poll: 0,
         occupants: [],
         type: 'VotingArea',
       };

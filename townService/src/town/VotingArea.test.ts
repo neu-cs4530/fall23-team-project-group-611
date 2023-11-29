@@ -10,12 +10,12 @@ describe('VotingArea', () => {
   let testArea: VotingArea;
   const townEmitter = mock<TownEmitter>();
   const id = nanoid();
-  const votes = 0;
+  const poll = 0;
   let newPlayer: Player;
 
   beforeEach(() => {
     mockClear(townEmitter);
-    testArea = new VotingArea({ id, occupants: [], votes }, testAreaBox, townEmitter);
+    testArea = new VotingArea({ id, occupants: [], poll }, testAreaBox, townEmitter);
     newPlayer = new Player(nanoid(), mock<TownEmitter>());
   });
   describe('joining the voting area', () => {
@@ -26,13 +26,13 @@ describe('VotingArea', () => {
 
       const lastEmittedUpdate = getLastEmittedEvent(townEmitter, 'interactableUpdate');
       expect(lastEmittedUpdate).toEqual({
-        votes,
+        poll,
         id,
         occupants: [newPlayer.id],
         type: 'VotingArea',
       });
     });
-    it("Sets the player's votes and emits an update for their location", () => {
+    it("Sets the player's poll and emits an update for their location", () => {
       testArea.add(newPlayer);
       expect(newPlayer.location.interactableID).toEqual(id);
 
@@ -50,25 +50,25 @@ describe('VotingArea', () => {
       expect(testArea.occupantsByID).toEqual([newerPlayer.id]);
       const lastEmittedUpdate = getLastEmittedEvent(townEmitter, 'interactableUpdate');
       expect(lastEmittedUpdate).toEqual({
-        votes,
+        poll,
         id,
         occupants: [newerPlayer.id],
         type: 'VotingArea',
       });
     });
-    it("Clears the player's votes and emits an update for their location", () => {
+    it("Clears the player's poll and emits an update for their location", () => {
       testArea.add(newPlayer);
       testArea.remove(newPlayer);
       expect(newPlayer.location.interactableID).toBeUndefined();
       const lastEmittedMovement = getLastEmittedEvent(townEmitter, 'playerMoved');
       expect(lastEmittedMovement.location.interactableID).toBeUndefined();
     });
-    it('Clears the votes of the VotingArea when the last occupant leaves', () => {
+    it('Clears the poll of the VotingArea when the last occupant leaves', () => {
       testArea.add(newPlayer);
       testArea.remove(newPlayer);
       const lastEmittedUpdate = getLastEmittedEvent(townEmitter, 'interactableUpdate');
       expect(lastEmittedUpdate).toEqual({
-        votes: 0,
+        poll: 0,
         id,
         occupants: [],
         type: 'VotingArea',
