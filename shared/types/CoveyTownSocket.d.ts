@@ -65,7 +65,7 @@ export interface ConversationArea extends Interactable {
 
 
 export interface VotingArea extends Interactable {
-  votes: number;
+  poll: string;
 };
 
 export interface BoundingBox {

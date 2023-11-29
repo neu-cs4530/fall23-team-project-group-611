@@ -30,8 +30,8 @@ export default function Leaderboard({ results }: { results: GameResult[] }): JSX
       result.scores[p1] > result.scores[p2]
         ? p1
         : result.scores[p2] > result.scores[p1]
-        ? p2
-        : undefined;
+          ? p2
+          : undefined;
     if (winner) {
       winsLossesTiesByPlayer[winner] = {
         player: winner,
@@ -44,8 +44,8 @@ export default function Leaderboard({ results }: { results: GameResult[] }): JSX
       result.scores[p1] > result.scores[p2]
         ? p2
         : result.scores[p2] > result.scores[p1]
-        ? p1
-        : undefined;
+          ? p1
+          : undefined;
     if (loser) {
       winsLossesTiesByPlayer[loser] = {
         player: loser,

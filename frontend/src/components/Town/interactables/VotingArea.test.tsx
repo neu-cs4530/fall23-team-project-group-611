@@ -22,7 +22,7 @@ import * as ReactPlayer from 'react-player';
 
 //   private _seekSpy: jest.Mock<never, [number]>;
 
-//   public currentVotes = 0;
+//   public currentPoll = 0;
 
 //   constructor(
 //     props: ReactPlayer.ReactPlayerProps,
@@ -35,13 +35,13 @@ import * as ReactPlayer from 'react-player';
 //   }
 // }
 
-//   getCurrentVotes() {
-//     return this.currentVotes;
+//   getCurrentPoll() {
+//     return this.currentPoll;
 //   }
 
-//   seekTo(newVotes: number) {
-//     this.currentVotes = newVotes;
-//     this._seekSpy(newVotes);
+//   seekTo(newPoll: number) {
+//     this.currentPoll = newPoll;
+//     this._seekSpy(newPoll);
 //   }
 
 //   componentDidUpdate(): void {
@@ -121,7 +121,7 @@ describe('VotingArea', () => {
   //     return componentDidUpdateSpy.mock.calls[componentDidUpdateSpy.mock.calls.length - 1][0];
   //   }
   //   /**
-  //    * Retrieve the votes that were passed to 'seek' in its most recent call
+  //    * Retrieve the poll that were passed to 'seek' in its most recent call
   //    */
   //   function lastSeekCall() {
   //     return seekSpy.mock.calls[seekSpy.mock.calls.length - 1][0];
@@ -161,7 +161,7 @@ describe('VotingArea', () => {
   //   }
   describe('join', () => {
     it('Adds player to the occupants list and emits an interactableUpdate event', () => {});
-    it('Initializes votes prop to undefined or players votes/ votes from controller?? when first player joins', () => {});
+    it('Initializes poll prop to undefined or players poll/ poll from controller?? when first player joins', () => {});
     it('Properly initializes players voting data from third party when they join the VotingArea', () => {});
   });
   // });
