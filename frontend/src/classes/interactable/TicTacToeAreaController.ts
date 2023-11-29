@@ -1,7 +1,6 @@
 import {
   GameArea,
   GameStatus,
-  Player,
   TicTacToeGameState,
   TicTacToeGridPosition,
 } from '../../types/CoveyTownSocket';
@@ -230,28 +229,4 @@ export default class TicTacToeAreaController extends GameAreaController<
       }
     }
   }
-
-  /**
-   * Sends a request to the server to remove the player from this area (and set them to the spawn point?)
-   * Uses the this._townController.sendInteractableCommand method to send the request.
-   * The request should be of type 'KickPlayerCommand',
-   * and send the gameID provided by `this._instanceID`.
-   *
-   *
-   * @param player: the player to remove from the area
-   */
-  public async removePlayer(player: Player): Promise<void> {
-    // if (this.occupants.length === 0)
-    await this._townController.sendInteractableCommand(this.id, {
-      type: 'KickPlayerCommand',
-      playerid: player.id,
-    });
-  }
-  // public remove(player: Player) {
-  //   super.remove(player);
-  //   if (this._occupants.length === 0) {
-  //     // this.votes = 0;
-  //     this._emitAreaChanged();
-  //   }
-  // }
 }

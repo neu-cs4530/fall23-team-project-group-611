@@ -617,35 +617,6 @@
                  "y":1068.23340899987
                 }, 
                 {
-<<<<<<< HEAD
-                 "height":128,
-                 "id":52,
-                 "name":"Vote Comp 3",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":159.667645,
-                 "x":3584,
-                 "y":416
-                }, 
-                {
-                 "height":128,
-                 "id":54,
-                 "name":"Vote Comp 2",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":159.668,
-                 "x":3584,
-                 "y":288
-                }, 
-                {
-                 "height":128,
-                 "id":55,
-                 "name":"Vote Comp 1",
-                 "rotation":0,
-                 "type":"",
-=======
                  "height":96,
                  "id":52,
                  "name":"Vote Comp 3",
@@ -673,54 +644,23 @@
                  "name":"Vote Comp 1",
                  "rotation":0,
                  "type":"VotingArea",
->>>>>>> sprint3-area
                  "visible":true,
                  "width":159.668,
                  "x":3584,
                  "y":160
                 }, 
                 {
-<<<<<<< HEAD
-                 "height":128,
-                 "id":56,
-                 "name":"Votekick Comp",
-                 "rotation":0,
-                 "type":"",
-=======
                  "height":96,
                  "id":56,
                  "name":"Votekick Comp",
                  "rotation":0,
                  "type":"VotingArea",
->>>>>>> sprint3-area
                  "visible":true,
                  "width":96,
                  "x":3424,
                  "y":160
                 }, 
                 {
-<<<<<<< HEAD
-                 "height":128,
-                 "id":57,
-                 "name":"Survey Comp",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":96,
-                 "x":3424,
-                 "y":288
-                }, 
-                {
-                 "height":128,
-                 "id":59,
-                 "name":"Vote Results",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":192,
-                 "x":3488,
-                 "y":32
-=======
                  "height":96,
                  "id":57,
                  "name":"Survey Comp",
@@ -730,7 +670,6 @@
                  "width":96,
                  "x":3424,
                  "y":320
->>>>>>> sprint3-area
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -739,11 +678,7 @@
          "y":0
         }],
  "nextlayerid":8,
-<<<<<<< HEAD
- "nextobjectid":60,
-=======
  "nextobjectid":62,
->>>>>>> sprint3-area
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.2",

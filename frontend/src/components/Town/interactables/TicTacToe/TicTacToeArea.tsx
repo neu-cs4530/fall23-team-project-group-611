@@ -15,7 +15,6 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  VStack,
   useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -157,16 +156,6 @@ function TicTacToeArea({ interactableID }: { interactableID: InteractableID }): 
     );
   }
 
-  const [showPlayerList, setShowPlayerList] = useState<boolean>(false);
-  function handleVoteKick(event: MouseEvent<HTMLButtonElement, MouseEvent>): void {
-    setShowPlayerList(true);
-  }
-  function handleRemovePlayer(
-    observer: PlayerController,
-  ): React.MouseEventHandler<HTMLButtonElement> | undefined {
-    gameAreaController.removePlayer(observer);
-  }
-
   return (
     <Container>
       <Accordion allowToggle>
@@ -207,18 +196,6 @@ function TicTacToeArea({ interactableID }: { interactableID: InteractableID }): 
         <ListItem>O: {o?.userName || '(No player yet!)'}</ListItem>
       </List>
       <TicTacToeBoard gameAreaController={gameAreaController} />
-      <Button onClick={handleVoteKick}>Vote to kick</Button>
-      {showPlayerList && (
-        <VStack>
-          {observers.map(observer => {
-            return (
-              <Button key={observer.id} onClick={handleRemovePlayer(observer)}>
-                {observer.userName}
-              </Button>
-            );
-          })}
-        </VStack>
-      )}
     </Container>
   );
 }

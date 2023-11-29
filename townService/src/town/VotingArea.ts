@@ -82,9 +82,17 @@ export default class VotingArea extends InteractableArea {
     return new VotingArea({ votes: 0, id: name, occupants: [] }, rect, broadcastEmitter);
   }
 
-  public handleCommand<
-    CommandType extends InteractableCommand,
-  >(): InteractableCommandReturnType<CommandType> {
-    throw new InvalidParametersError('Unknown command type');
+  public handleCommand<CommandType extends InteractableCommand>(
+    command: CommandType,
+  ): InteractableCommandReturnType<CommandType> {
+    if (command.type === 'KickPlayerCommand') {
+      const playerController = this.occupants.find(
+        playerToKick => command.playerid === playerToKick.id,
+      );
+      if (playerController) {
+        this.remove(playerController);
+      }
+    }
+    return {} as InteractableCommandReturnType<CommandType>;
   }
 }

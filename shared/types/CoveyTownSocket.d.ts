@@ -208,6 +208,7 @@ export type InteractableCommandReturnType<CommandType extends InteractableComman
   CommandType extends ViewingAreaUpdateCommand ? undefined :
   CommandType extends GameMoveCommand<TicTacToeMove> ? undefined :
   CommandType extends LeaveGameCommand ? undefined :
+  CommandType extends KickPlayerCommand ? undefined :
   never;
 
 export type InteractableCommandResponse<MessageType> = {

@@ -33131,7 +33131,6 @@
                 }, 
                 {
                  "id":376,
-<<<<<<< HEAD
                  "properties":[
                         {
                          "name":"collides",
@@ -33141,8 +33140,6 @@
                 }, 
                 {
                  "id":377,
-=======
->>>>>>> sprint3-area
                  "properties":[
                         {
                          "name":"collides",
@@ -33151,18 +33148,6 @@
                         }]
                 }, 
                 {
-<<<<<<< HEAD
-=======
-                 "id":377,
-                 "properties":[
-                        {
-                         "name":"collides",
-                         "type":"bool",
-                         "value":true
-                        }]
-                }, 
-                {
->>>>>>> sprint3-area
                  "id":404,
                  "properties":[
                         {

@@ -10,16 +10,34 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  VStack,
   useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useInteractable } from '../../../classes/TownController';
-import { Omit_VotingArea_type_ } from '../../../generated/client';
+import {
+  useActiveVotingAreas,
+  useInteractable,
+  useInteractableAreaController,
+} from '../../../classes/TownController';
+import { InteractableID, Omit_VotingArea_type_ } from '../../../generated/client';
 import useTownController from '../../../hooks/useTownController';
+import VotingAreaController from '../../../classes/interactable/VotingAreaController';
+import PlayerController from '../../../classes/PlayerController';
+import VotingArea from './VotingArea';
 
 export default function NewVotingModal(): JSX.Element {
   const coveyTownController = useTownController();
   const newVoting = useInteractable('votingArea');
+  const votingArea = useInteractable<VotingArea>('votingArea');
+  // if (!votingArea?.name) {
+  //   return <></>;
+  // }
+  const votingAreaControllers = useActiveVotingAreas();
+  console.log(votingAreaControllers);
+  const thisVotingAreaController = votingAreaControllers.find(
+    controller => controller.id === votingArea?.id,
+  );
+
   const [votes, setVotes] = useState<string>('');
 
   const isOpen = newVoting !== undefined;
@@ -74,6 +92,16 @@ export default function NewVotingModal(): JSX.Element {
     }
   }, [votes, setVotes, coveyTownController, newVoting, closeModal, toast]);
 
+  const [showPlayerList, setShowPlayerList] = useState<boolean>(false);
+  function handleVoteKick(): void {
+    setShowPlayerList(true);
+  }
+  function handleRemovePlayer(
+    occupant: PlayerController,
+  ): React.MouseEventHandler<HTMLButtonElement> | undefined {
+    thisVotingAreaController.removePlayer(occupant);
+  }
+
   return (
     <Modal
       isOpen={isOpen}
@@ -103,6 +131,18 @@ export default function NewVotingModal(): JSX.Element {
             <Button onClick={closeModal}>Cancel</Button>
           </ModalFooter>
         </form>
+        <Button onClick={handleVoteKick}>Vote to kick</Button>
+        {showPlayerList && (
+          <VStack>
+            {thisVotingAreaController.occupants.map(occupant => {
+              return (
+                <Button key={occupant.id} onClick={handleRemovePlayer(occupant)}>
+                  {occupant.userName}
+                </Button>
+              );
+            })}
+          </VStack>
+        )}
       </ModalContent>
     </Modal>
   );

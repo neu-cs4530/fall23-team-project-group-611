@@ -629,6 +629,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
               VotingAreaController.fromVotingAreaModel(
                 eachInteractable,
                 this._playersByIDs.bind(this),
+                this,
               ),
             );
           } else if (isViewingArea(eachInteractable)) {
