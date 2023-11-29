@@ -2,14 +2,12 @@ import {
   Box,
   Button,
   FormControl,
-  FormLabel,
   Heading,
   Input,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Radio,
@@ -157,7 +155,7 @@ export default function NewVotingModal(): JSX.Element {
             <Button colorScheme='blue' mr={3} onClick={createVoting}>
               Create Poll
             </Button>
-            <Button colorScheme='blue' mr={3} value={''} onClick={e => setPoll('')}>
+            <Button colorScheme='blue' mr={3} value={''}>
               Clear Poll
             </Button>
             <Button onClick={closeModal}>Cancel</Button>
