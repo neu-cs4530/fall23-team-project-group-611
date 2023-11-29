@@ -1,5 +1,5 @@
 import { ITiledMapObject } from '@jonbell/tiled-map-type-guard';
-import InvalidParametersError from '../lib/InvalidParametersError';
+// import InvalidParametersError from '../lib/InvalidParametersError';
 import Player from '../lib/Player';
 import {
   BoundingBox,
@@ -11,8 +11,8 @@ import {
 import InteractableArea from './InteractableArea';
 
 export default class VotingArea extends InteractableArea {
-  /* The votes of the voting area, or undefined if it is not set */
-  public votes: number;
+  /* The poll of the voting area, or undefined if it is not set */
+  public poll: string;
 
   /** The voting area is "active" when there are players inside of it  */
   public get isActive(): boolean {
@@ -22,23 +22,23 @@ export default class VotingArea extends InteractableArea {
   /**
    * Creates a new VotingArea
    *
-   * @param votingAreaModel model containing this area's current votes and its ID
+   * @param votingAreaModel model containing this area's current poll and its ID
    * @param coordinates  the bounding box that defines this voting area
    * @param townEmitter a broadcast emitter that can be used to emit updates to players
    */
   public constructor(
-    { votes, id }: Omit<VotingAreaModel, 'type'>,
+    { poll, id }: Omit<VotingAreaModel, 'type'>,
     coordinates: BoundingBox,
     townEmitter: TownEmitter,
   ) {
     super(id, coordinates, townEmitter);
-    this.votes = votes;
+    this.poll = poll;
   }
 
   /**
    * Removes a player from this voting area.
    *
-   * Extends the base behavior of InteractableArea to set the votes of this VotingArea to undefined and
+   * Extends the base behavior of InteractableArea to set the poll of this VotingArea to undefined and
    * emit an update to other players in the town when the last player leaves.
    *
    * @param player
@@ -48,7 +48,7 @@ export default class VotingArea extends InteractableArea {
     // player.location.x = 3110.91;
     // player.location.y = 878.86;
     if (this._occupants.length === 0) {
-      this.votes = 0;
+      // this.poll = 0;
       this._emitAreaChanged();
     }
   }
@@ -61,7 +61,7 @@ export default class VotingArea extends InteractableArea {
     return {
       id: this.id,
       occupants: this.occupantsByID,
-      votes: this.votes,
+      poll: this.poll,
       type: 'VotingArea',
     };
   }
@@ -81,7 +81,7 @@ export default class VotingArea extends InteractableArea {
       throw new Error(`Malformed viewing area ${name}`);
     }
     const rect: BoundingBox = { x: mapObject.x, y: mapObject.y, width, height };
-    return new VotingArea({ votes: 0, id: name, occupants: [] }, rect, broadcastEmitter);
+    return new VotingArea({ poll: '', id: name, occupants: [] }, rect, broadcastEmitter);
   }
 
   public handleCommand<CommandType extends InteractableCommand>(

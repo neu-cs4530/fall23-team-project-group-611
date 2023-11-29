@@ -570,7 +570,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    *
    * @param newArea
    */
-  async createVotingArea(newArea: { votes: number; id: string; occupants: Array<string> }) {
+  async createVotingArea(newArea: { poll: string; id: string; occupants: Array<string> }) {
     await this._townsService.createVotingArea(this.townID, this.sessionToken, newArea);
   }
 
