@@ -17,7 +17,7 @@ export type TownJoinResponse = {
   interactables: TypedInteractable[];
 }
 
-export type InteractableType = 'ConversationArea' | 'VotingArea' | 'ViewingArea' | 'TicTacToeArea';
+export type InteractableType = 'ConversationArea' | 'VotingArea'  | 'SurveyArea' | 'ViewingArea' | 'TicTacToeArea';
 export interface Interactable {
   type: InteractableType;
   id: InteractableID;
@@ -66,6 +66,10 @@ export interface ConversationArea extends Interactable {
 
 export interface VotingArea extends Interactable {
   votes: number;
+};
+
+export interface SurveyArea extends Interactable {
+  responses: Record<string, number>;
 };
 
 export interface BoundingBox {

@@ -25,7 +25,7 @@ export default class VotingAreaController extends InteractableAreaController<
   /**
    * Create a new VotingAreaController
    * @param id
-   * @param votes
+   * @param votes 
    */
   constructor(id: string, votes: number) {
     super(id);

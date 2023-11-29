@@ -42,6 +42,8 @@ import TicTacToeAreaController from './interactable/TicTacToeAreaController';
 import ViewingAreaController from './interactable/ViewingAreaController';
 import VotingAreaController from './interactable/VotingAreaController';
 import PlayerController from './PlayerController';
+import SurveyArea from '../components/Town/interactables/SurveyArea';
+import SurveyController from './interactable/SurveyController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -688,6 +690,17 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       return existingController;
     } else {
       throw new Error(`No such viewing area controller ${existingController}`);
+    }
+  }
+
+  public getSurveyAreaController(surveyArea: SurveyArea): SurveyController {
+    const existingController = this._interactableControllers.find(
+      eachExistingArea => eachExistingArea.id === surveyArea.id,
+    );
+    if (existingController instanceof SurveyController) {
+      return existingController;
+    } else {
+      throw new Error(`No such survey area controller ${existingController}`);
     }
   }
 
