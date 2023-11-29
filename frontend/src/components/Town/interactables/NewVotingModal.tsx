@@ -69,7 +69,7 @@ export default function NewVotingModal(): JSX.Element {
       } catch (err) {
         if (err instanceof Error) {
           toast({
-            title: 'Unable to create voting',
+            title: 'A poll is currently active',
             description: err.toString(),
             status: 'error',
           });
