@@ -37,6 +37,7 @@ export default function NewVotingModal(): JSX.Element {
   const thisVotingAreaController = votingAreaControllers.find(
     controller => controller.id === votingArea?.id,
   );
+  // const controller = useInteractableAreaController(thisVotingAreaController?.id);
 
   const [votes, setVotes] = useState<string>('');
 

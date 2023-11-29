@@ -45,6 +45,8 @@ export default class VotingArea extends InteractableArea {
    */
   public remove(player: Player) {
     super.remove(player);
+    // player.location.x = 3110.91;
+    // player.location.y = 878.86;
     if (this._occupants.length === 0) {
       this.votes = 0;
       this._emitAreaChanged();
