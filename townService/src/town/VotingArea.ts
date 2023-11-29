@@ -14,9 +14,9 @@ export default class VotingArea extends InteractableArea {
   /* The poll of the voting area, or undefined if it is not set */
   public poll: string;
 
-  /** The voting area is "active" when there are players inside of it  */
+  /** The voting area is "active" when there is a poll inside of it  */
   public get isActive(): boolean {
-    return this._occupants.length > 0;
+    return this.poll !== '';
   }
 
   /**

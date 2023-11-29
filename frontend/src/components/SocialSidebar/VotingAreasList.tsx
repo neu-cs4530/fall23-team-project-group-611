@@ -53,9 +53,9 @@ export default function VotingAreasList(): JSX.Element {
       ) : (
         activeVotingAreas
           .sort((a1, a2) =>
-            a1.id.localeCompare(a2.id, undefined, { numeric: true, sensitivity: 'base' }),
+            a1.poll.localeCompare(a2.poll, '', { numeric: true, sensitivity: 'base' }),
           )
-          .map(area => <VotingAreaView area={area} key={area.id} />)
+          .map(area => <VotingAreaView area={area} key={area.poll} />)
       )}
     </Box>
   );

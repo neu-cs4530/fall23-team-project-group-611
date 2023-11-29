@@ -35,7 +35,7 @@ export default class VotingAreaController extends InteractableAreaController<
   }
 
   public isActive(): boolean {
-    return this.poll !== '' && this.occupants.length > 0;
+    return this.poll !== '';
   }
 
   /**
@@ -62,7 +62,7 @@ export default class VotingAreaController extends InteractableAreaController<
    * A voting area is empty if there are no occupants in it, or the poll is undefined.
    */
   isEmpty(): boolean {
-    return this._poll === '' || this.occupants.length === 0;
+    return this._poll === '';
   }
 
   /**

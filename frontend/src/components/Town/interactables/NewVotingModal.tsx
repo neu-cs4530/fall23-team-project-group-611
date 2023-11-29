@@ -1,7 +1,9 @@
 import {
+  Box,
   Button,
   FormControl,
   FormLabel,
+  Heading,
   Input,
   Modal,
   ModalBody,
@@ -10,6 +12,15 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Radio,
+  RadioGroup,
+  Stack,
+  Table,
+  TableContainer,
+  Tbody,
+  Th,
+  Thead,
+  Tr,
   useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -20,7 +31,8 @@ import useTownController from '../../../hooks/useTownController';
 export default function NewVotingModal(): JSX.Element {
   const coveyTownController = useTownController();
   const newVoting = useInteractable('votingArea');
-  const [votes, setVotes] = useState<string>('');
+  const [poll, setPoll] = useState<string>('');
+  const [value, setValue] = React.useState('0');
 
   const isOpen = newVoting !== undefined;
 
@@ -41,11 +53,11 @@ export default function NewVotingModal(): JSX.Element {
   const toast = useToast();
 
   const createVoting = useCallback(async () => {
-    if (votes && newVoting) {
+    if (poll && newVoting) {
       const votingToCreate: Omit_VotingArea_type_ = {
         id: newVoting.name,
         occupants: [],
-        votes: 0,
+        poll,
       };
       try {
         await coveyTownController.createVotingArea(votingToCreate);
@@ -53,7 +65,7 @@ export default function NewVotingModal(): JSX.Element {
           title: 'Voting Created!',
           status: 'success',
         });
-        setVotes('');
+        setPoll('');
         coveyTownController.unPause();
         closeModal();
       } catch (err) {
@@ -72,7 +84,7 @@ export default function NewVotingModal(): JSX.Element {
         }
       }
     }
-  }, [votes, setVotes, coveyTownController, newVoting, closeModal, toast]);
+  }, [poll, setPoll, coveyTownController, newVoting, closeModal, toast]);
 
   return (
     <Modal
@@ -83,7 +95,7 @@ export default function NewVotingModal(): JSX.Element {
       }}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Create a voting in {newVoting?.name} </ModalHeader>
+        <ModalHeader>Create a poll in {newVoting?.name} </ModalHeader>
         <ModalCloseButton />
         <form
           onSubmit={ev => {
@@ -92,16 +104,64 @@ export default function NewVotingModal(): JSX.Element {
           }}>
           <ModalBody pb={6}>
             <FormControl>
-              <FormLabel>Email address</FormLabel>
-              <Input type='email' />
+              <Input
+                id='poll'
+                placeholder='Share the poll to vote on'
+                name='poll'
+                value={poll}
+                onChange={e => setPoll(e.target.value)}
+              />
             </FormControl>
           </ModalBody>
-          <ModalFooter>
+          <ModalBody>
+            <RadioGroup onChange={setValue} value={value}>
+              <Stack direction='row'>
+                <Radio value='1'>Hate</Radio>
+                <Radio value='2'>Disagree</Radio>
+                <Radio value='3'>Neutral</Radio>
+                <Radio value='4'>Agree</Radio>
+                <Radio value='5'>Love</Radio>
+              </Stack>
+            </RadioGroup>
+          </ModalBody>
+          <ModalBody>
+            <Box>
+              <Heading as='h2' fontSize='l'>
+                Poll Results
+              </Heading>
+              <TableContainer>
+                <Table size='sm' variant='unstyled'>
+                  <Thead>
+                    <Tr>
+                      <Th>Hate</Th>
+                      <Th>Disagree</Th>
+                      <Th>Neutral</Th>
+                      <Th>Agree</Th>
+                      <Th>Love</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    <Tr>
+                      <Th>0</Th>
+                      <Th>0</Th>
+                      <Th>0</Th>
+                      <Th>0</Th>
+                      <Th>0</Th>
+                    </Tr>
+                  </Tbody>
+                </Table>
+              </TableContainer>
+            </Box>
+          </ModalBody>
+          <ModalBody>
             <Button colorScheme='blue' mr={3} onClick={createVoting}>
-              Create
+              Create Poll
+            </Button>
+            <Button colorScheme='blue' mr={3} value={''} onClick={e => setPoll('')}>
+              Clear Poll
             </Button>
             <Button onClick={closeModal}>Cancel</Button>
-          </ModalFooter>
+          </ModalBody>
         </form>
       </ModalContent>
     </Modal>
