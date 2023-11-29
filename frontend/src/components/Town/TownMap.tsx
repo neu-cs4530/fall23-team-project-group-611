@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import useTownController from '../../hooks/useTownController';
 import SocialSidebar from '../SocialSidebar/SocialSidebar';
 import NewConversationModal from './interactables/NewCoversationModal';
+import NewVotingModal from './interactables/NewVotingModal';
 import TownGameScene from './TownGameScene';
 import TicTacToeAreaWrapper from './interactables/TicTacToe/TicTacToeArea';
 
@@ -49,6 +50,7 @@ export default function TownMap(): JSX.Element {
   return (
     <div id='app-container'>
       <NewConversationModal />
+      <NewVotingModal />
       <TicTacToeAreaWrapper />
 
       <div id='map-container' />

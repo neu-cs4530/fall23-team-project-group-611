@@ -3,69 +3,72 @@ import { nanoid } from 'nanoid';
 import Player from '../lib/Player';
 import { getLastEmittedEvent } from '../TestUtils';
 import { TownEmitter } from '../types/CoveyTownSocket';
-// import VotingArea from './VotingArea';
+import VotingArea from './VotingArea';
 
-// ********* NOTE: THIS IS A SKELETON FOR THE TESTS FOR JOINING AND LEAVING A VOTINGAREA (inspired from interactableArea/conversationArea tests)
-// THESE TEST WILL ALMOST CERTAINLY NEED TO BE UPDATED AS VOTINGAREA IS FURTHER IMPLEMENTED ********
 describe('VotingArea', () => {
-  // const testAreaBox = { x: 100, y: 100, width: 100, height: 100 };
-  // let testArea: VotingArea;
+  const testAreaBox = { x: 100, y: 100, width: 100, height: 100 };
+  let testArea: VotingArea;
   const townEmitter = mock<TownEmitter>();
-  const votingTopic = nanoid();
   const id = nanoid();
+  const votes = 0;
   let newPlayer: Player;
 
   beforeEach(() => {
     mockClear(townEmitter);
-    // testArea = new VotingArea({ topic, id, occupants: [] }, testAreaBox, townEmitter);
+    testArea = new VotingArea({ id, occupants: [], votes }, testAreaBox, townEmitter);
     newPlayer = new Player(nanoid(), mock<TownEmitter>());
   });
-  describe('join', () => {
+  describe('joining the voting area', () => {
     it('Adds the player to the occupants list and emits an interactableUpdate event', () => {
-      // testArea.join(newPlayer);
-      // expect(testArea.occupantsByID).toEqual([newPlayer.id]);
+      testArea.add(newPlayer);
+      expect(testArea.occupantsByID).toEqual([newPlayer.id]);
+      expect(testArea.isActive).toBe(true);
 
       const lastEmittedUpdate = getLastEmittedEvent(townEmitter, 'interactableUpdate');
       expect(lastEmittedUpdate).toEqual({
-        votingTopic,
+        votes,
         id,
         occupants: [newPlayer.id],
         type: 'VotingArea',
       });
     });
-    it("Sets the player's votingTopicLabel and emits an update for their location", () => {
+    it("Sets the player's votes and emits an update for their location", () => {
+      testArea.add(newPlayer);
       expect(newPlayer.location.interactableID).toEqual(id);
 
       const lastEmittedMovement = getLastEmittedEvent(townEmitter, 'playerMoved');
       expect(lastEmittedMovement.location.interactableID).toEqual(id);
     });
   });
-  describe('leave', () => {
+  describe('leaving the voting area', () => {
     it('Removes the player from the list of occupants and emits an interactableUpdate event', () => {
-      const extraPlayer = new Player(nanoid(), mock<TownEmitter>());
-      // testArea.join(extraPlayer);
-      // testArea.leave(newPlayer);
+      testArea.add(newPlayer);
+      const newerPlayer = new Player(nanoid(), mock<TownEmitter>());
+      testArea.add(newerPlayer);
+      testArea.remove(newPlayer);
 
-      // expect(testArea.occupantsByID).toEqual([extraPlayer.id]);
+      expect(testArea.occupantsByID).toEqual([newerPlayer.id]);
       const lastEmittedUpdate = getLastEmittedEvent(townEmitter, 'interactableUpdate');
       expect(lastEmittedUpdate).toEqual({
-        votingTopic,
+        votes,
         id,
-        occupants: [extraPlayer.id],
+        occupants: [newerPlayer.id],
         type: 'VotingArea',
       });
     });
-    it("Clears the player's votingTopicLabel and emits an update for their location", () => {
-      // testArea.leave(newPlayer);
+    it("Clears the player's votes and emits an update for their location", () => {
+      testArea.add(newPlayer);
+      testArea.remove(newPlayer);
       expect(newPlayer.location.interactableID).toBeUndefined();
       const lastEmittedMovement = getLastEmittedEvent(townEmitter, 'playerMoved');
       expect(lastEmittedMovement.location.interactableID).toBeUndefined();
     });
-    it('Clears the votingTopic of the VotingArea when the last occupant leaves', () => {
-      // testArea.leave(newPlayer);
+    it('Clears the votes of the VotingArea when the last occupant leaves', () => {
+      testArea.add(newPlayer);
+      testArea.remove(newPlayer);
       const lastEmittedUpdate = getLastEmittedEvent(townEmitter, 'interactableUpdate');
       expect(lastEmittedUpdate).toEqual({
-        votingTopic: undefined,
+        votes: 0,
         id,
         occupants: [],
         type: 'VotingArea',
