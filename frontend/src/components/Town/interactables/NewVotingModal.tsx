@@ -22,7 +22,7 @@ export default function NewVotingModal(): JSX.Element {
   const newVoting = useInteractable('votingArea');
   const [votes, setVotes] = useState<string>('');
 
-  const isOpen = newVoting !== undefined;
+  const isVoteOpen = newVoting !== undefined;
 
   useEffect(() => {
     if (newVoting) {
@@ -45,7 +45,7 @@ export default function NewVotingModal(): JSX.Element {
       const votingToCreate: Omit_VotingArea_type_ = {
         id: newVoting.name,
         occupants: [],
-        votes: 0,
+        votes: 0, 
       };
       try {
         await coveyTownController.createVotingArea(votingToCreate);
@@ -76,7 +76,7 @@ export default function NewVotingModal(): JSX.Element {
 
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen={isVoteOpen}
       onClose={() => {
         closeModal();
         coveyTownController.unPause();

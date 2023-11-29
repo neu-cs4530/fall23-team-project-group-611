@@ -1,0 +1,70 @@
+import InvalidParametersError, { GAME_ID_MISSMATCH_MESSAGE, GAME_NOT_IN_PROGRESS_MESSAGE, INVALID_COMMAND_MESSAGE, } from '../../lib/InvalidParametersError';
+import GameArea from './GameArea';
+import TicTacToeGame from './TicTacToeGame';
+export default class TicTacToeGameArea extends GameArea {
+    getType() {
+        return 'TicTacToeArea';
+    }
+    _stateUpdated(updatedState) {
+        if (updatedState.state.status === 'OVER') {
+            const gameID = this._game?.id;
+            if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
+                const { x, o } = updatedState.state;
+                if (x && o) {
+                    const xName = this._occupants.find(eachPlayer => eachPlayer.id === x)?.userName || x;
+                    const oName = this._occupants.find(eachPlayer => eachPlayer.id === o)?.userName || o;
+                    this._history.push({
+                        gameID,
+                        scores: {
+                            [xName]: updatedState.state.winner === x ? 1 : 0,
+                            [oName]: updatedState.state.winner === o ? 1 : 0,
+                        },
+                    });
+                }
+            }
+        }
+        this._emitAreaChanged();
+    }
+    handleCommand(command, player) {
+        if (command.type === 'GameMove') {
+            const game = this._game;
+            if (!game) {
+                throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+            }
+            if (this._game?.id !== command.gameID) {
+                throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
+            }
+            game.applyMove({
+                gameID: command.gameID,
+                playerID: player.id,
+                move: command.move,
+            });
+            this._stateUpdated(game.toModel());
+            return undefined;
+        }
+        if (command.type === 'JoinGame') {
+            let game = this._game;
+            if (!game || game.state.status === 'OVER') {
+                game = new TicTacToeGame();
+                this._game = game;
+            }
+            game.join(player);
+            this._stateUpdated(game.toModel());
+            return { gameID: game.id };
+        }
+        if (command.type === 'LeaveGame') {
+            const game = this._game;
+            if (!game) {
+                throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+            }
+            if (this._game?.id !== command.gameID) {
+                throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
+            }
+            game.leave(player);
+            this._stateUpdated(game.toModel());
+            return undefined;
+        }
+        throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVGljVGFjVG9lR2FtZUFyZWEuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvdG93bi9nYW1lcy9UaWNUYWNUb2VHYW1lQXJlYS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLHNCQUFzQixFQUFFLEVBQzdCLHlCQUF5QixFQUN6Qiw0QkFBNEIsRUFDNUIsdUJBQXVCLEdBQ3hCLE1BQU0sa0NBQWtDLENBQUM7QUFTMUMsT0FBTyxRQUFRLE1BQU0sWUFBWSxDQUFDO0FBQ2xDLE9BQU8sYUFBYSxNQUFNLGlCQUFpQixDQUFDO0FBTzVDLE1BQU0sQ0FBQyxPQUFPLE9BQU8saUJBQWtCLFNBQVEsUUFBdUI7SUFDMUQsT0FBTztRQUNmLE9BQU8sZUFBZSxDQUFDO0lBQ3pCLENBQUM7SUFFTyxhQUFhLENBQUMsWUFBOEM7UUFDbEUsSUFBSSxZQUFZLENBQUMsS0FBSyxDQUFDLE1BQU0sS0FBSyxNQUFNLEVBQUU7WUFFeEMsTUFBTSxNQUFNLEdBQUcsSUFBSSxDQUFDLEtBQUssRUFBRSxFQUFFLENBQUM7WUFDOUIsSUFBSSxNQUFNLElBQUksQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxVQUFVLENBQUMsRUFBRSxDQUFDLFVBQVUsQ0FBQyxNQUFNLEtBQUssTUFBTSxDQUFDLEVBQUU7Z0JBQzdFLE1BQU0sRUFBRSxDQUFDLEVBQUUsQ0FBQyxFQUFFLEdBQUcsWUFBWSxDQUFDLEtBQUssQ0FBQztnQkFDcEMsSUFBSSxDQUFDLElBQUksQ0FBQyxFQUFFO29CQUNWLE1BQU0sS0FBSyxHQUFHLElBQUksQ0FBQyxVQUFVLENBQUMsSUFBSSxDQUFDLFVBQVUsQ0FBQyxFQUFFLENBQUMsVUFBVSxDQUFDLEVBQUUsS0FBSyxDQUFDLENBQUMsRUFBRSxRQUFRLElBQUksQ0FBQyxDQUFDO29CQUNyRixNQUFNLEtBQUssR0FBRyxJQUFJLENBQUMsVUFBVSxDQUFDLElBQUksQ0FBQyxVQUFVLENBQUMsRUFBRSxD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
